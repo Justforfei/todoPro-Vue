@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>myTree demo</title>
+    <style>
+      body {
+        font-family: Menlo, Consolas, monospace;
+        color: #444;
+      }
+      .item {
+        cursor: pointer;
+      }
+      .bold {
+        font-weight: bold;
+      }
+      ul {
+        padding-left: 1em;
+        line-height: 1.5em;
+        list-style-type: dot;
+      }
+    </style>
+    <script src="vue.js"></script>
+  </head>
+  <body>
+      <script type="text/x-template" id="item-template">
+          <li class="todo"
+                :class="{completed: model.completed, editing: model == editedTodo}">
+            <div
+                :class="{bold: isFolder}"
+                @click="debug()">
+                <input class="edit" type="text" tabindex="{{index}}"
+                    v-model="model.name"
+                    @focus="startEdit(model)"
+                    @blur="doneEdit(model)"
+                    @keyup.enter="doneEdit(model)"
+                    @keyup.esc="cancelEdit(model)">
+                    {{model.completed}}
+                <div class="handle">
+                    <span @click.stop="toggle" v-if="isFolder">[{{open ? '-' : '+'}}]</span>
+                    <span @click.stop="remove(model)" v-if="!isRoot">[x]</span>
+                    <span @click.stop="upLevel(model)" v-if="!(isRoot||isSecLevel||model.completed)">[&lt;-]</span>
+                    <span @click.stop="downLevel(model)" v-if="!(isFirstChild||model.completed)">[-&gt;]</span>
+                    <span @click.stop="goUp()" v-if="!(isRoot || isFirstChild || model.completed)">[^]</span>
+                    <span @click.stop="goDown()" v-if="!(isRoot || isLastChild || model.completed)">[v]</span>
+                    <span @click.stop="copy(model)" v-if="!isRoot">[C]</span>
+                    <span @click.stop="paste(model)" v-if="!(isClipboardEmpty||model.completed)">[V]</span>
+                    <span @click.stop="cut(model)" v-if="!isRoot">[X]</span>
+                    <span @click.stop="insert(model)" v-if="!(isRoot||model.completed)">[+^]</span>
+                    <span @click.stop="append(model)" v-if="!(isRoot||model.completed)">[+v]</span>
+                    <span @click.stop="addChild(model)" v-if="!model.completed">[+son]</span>
+
+                    <input class="toggle" type="checkbox" v-model="model.completed"
+                        @click.stop="completeTodo(model)"  v-if="!(isRoot || model.completed)">
+                </div>
+            </div>
+            <ul v-show="open" v-if="isFolder">
+                <item
+                    class="item"
+                    v-for="model in model.children"
+                    :model="model">
+                </item>
+                <li @click="addChild(model)">+</li>
+            </ul>
+          </li>
+      </script>
+
+      <ul id="tree">
+          <item
+          class="item"
+          :model="treeData">
+          </item>
+      </ul>
+
+      <script src="tree.js"></script>
+  </body>
+</html>
